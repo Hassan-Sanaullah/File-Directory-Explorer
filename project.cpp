@@ -54,10 +54,13 @@ path mkdir_helper(path new_directory, node **current){
         return new_directory;
     }
     else if(!exists(new_directory)){
-        //new_directory = mkdir_helper(new_directory.parent_path(), current);
-        create_directory(mkdir_helper(new_directory.parent_path(), current));
-        node *new_node = new node(new_directory);
+
+        mkdir_helper(new_directory.parent_path(), current);
+
+        node *new_node = new node(new_directory);     
         (*current)->children.push_back(new_node);
+
+        cout << "Testing: did it make file? : " << create_directory(new_node->name) << endl;
 
         for (node *temp: (*current)->children){
             if(temp->name == new_directory)
@@ -116,20 +119,20 @@ int displayDirectoryStructure(node* root, int num_of_tab) {
     return 0;
 }
 
-node* change_directory(node *current, path current_directory){
+void change_directory(node **current, path current_directory){
     cout << "Change directory to: " << endl;
     string new_directory;
     cin >> new_directory;
 
-    vector<node*>::iterator iter;
+    //vector<node*>::iterator iter;
 
     //linear search through child vector for the directory
-    for (iter = current->children.begin(); iter != current->children.end(); iter++){
+    // for (iter = (*current)->children.begin(); iter != (*current)->children.end(); iter++){
+    for (node *temp: (*current)->children){
+        if (temp->name == ((*current)->name / new_directory)){
 
-        if ((*iter)->name == (current_directory / new_directory)){
-
-            current = *iter;
-            return (current);
+            (*current) = temp;
+            
         }
     }
 
@@ -163,7 +166,7 @@ int main()
             displayDirectoryStructure(root, 0);
         }
         else if(choice == "cd"){
-            current = change_directory(current, current_directory);
+            change_directory(&current, current_directory);
         }
         else if(choice == "clear"){
             system("CLS");

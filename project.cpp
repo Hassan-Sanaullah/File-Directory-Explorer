@@ -26,24 +26,35 @@ public:
     }
 };
 
+node *cd_recursion(stack<node *> &directory_stack, path new_directory);
+void change_directory(stack<node *> &directory_stack);
+
+path mkdir_recursion(path new_directory, node **current);
+void make_directory(node *current);
+
+void print_work_directory(node *current);
+
+
+
 void print_work_directory(node *current){
     cout << current->name << endl;
 }
 
 
-path mkdir_helper(path new_directory, node **current){
+path mkdir_recursion(path new_directory, node **current){
     
     if(exists(new_directory)){
         return new_directory;
     }
     else if(!exists(new_directory)){
 
-        mkdir_helper(new_directory.parent_path(), current);
+        mkdir_recursion(new_directory.parent_path(), current);
 
         node *new_node = new node(new_directory);     
         (*current)->children.push_back(new_node);
 
-        cout << "Testing: did it make file? : " << create_directory(new_node->name) << endl;
+        // cout << "Testing: did it make file? : " << create_directory(new_node->name) << endl;
+        create_directory(new_node->name);
 
         for (node *temp: (*current)->children){
             if(temp->name == new_directory)
@@ -54,26 +65,7 @@ path mkdir_helper(path new_directory, node **current){
 
 }
 
-path mkdir_helper2(path new_directory, node **current){
-    
-    if(exists(new_directory.parent_path())){
-        
-        node *new_node = new node(new_directory);     
-        (*current)->children.push_back(new_node);
-
-        cout << "Testing: did it make file? : " << create_directory(new_node->name) << endl;
-
-        for (node *temp: (*current)->children){
-            if(temp->name == new_directory)
-                (*current) = temp;
-        }
-        return new_directory;
-    }
-
-}
-
-
-void mkdir(node *current){
+void make_directory(node *current){
 
     cout << "Enter folder name: " << endl;
     string input_directory;
@@ -81,67 +73,61 @@ void mkdir(node *current){
 
     path new_directory = current->name / input_directory;
 
-    //PROBLEM!! cannot pass non existing path to function, must convert to string
-    mkdir_helper(new_directory.string(), &current);
-    //add condition here in case user enters folder1/folder2/folder3 to store them properly in children
-
-    // if(!exists(new_directory)){
-        
-    //     //create new node and push it to childern vector
-    //     node *new_node = new node(new_directory);
-    //     current->children.push_back(new_node);
-
-    //     //create folder
-    //     create_directory(new_directory);
-    //     cout << endl << new_directory << "\n created successfully\n";
-    // }
-    // else{
-    //     cout << "\nFile already exists\n";
-    // }
+    //NOTE: cannot pass non existing path to function, must convert to string
+    mkdir_recursion(new_directory.string(), &current);
+    
 }
 
-int displayDirectoryStructure(node* root, int num_of_tab) {
-
-    for (int i = 0; i < num_of_tab; i++){
-        cout << "\t";
-    }
-        cout << root->name.filename() << endl;
-
-    if(root->children.empty()){
-        return 0;
-    }
-    num_of_tab++;
-
-    vector<node*>::iterator iter;
-    for (iter = root->children.begin(); iter != root->children.end(); iter++){
+void displayDirectoryStructure(node* root, int depth = 0) {
+        for (int i = 0; i < depth; ++i) {
+            cout << "  "; // Add indentation based on the depth
+        }
+        cout << "|-- " << root->name.filename() << endl;
         
-        displayDirectoryStructure(*iter, num_of_tab);
+        for (node* child : root->children) {
+            displayDirectoryStructure(child, depth + 1);
+        }
+}
+
+node * cd_recursion(stack<node*>& directory_stack, path new_directory){
+    
+    if(directory_stack.top()->name == new_directory){
+        return directory_stack.top();
     }
-    return 0;
+    else{
+
+        cd_recursion(directory_stack, new_directory.parent_path());
+
+        for(node * temp: directory_stack.top()->children){
+            if(temp->name == new_directory){
+                directory_stack.push(temp);
+            }
+        }
+    }
 }
 
 void change_directory(stack<node*>& directory_stack){
     cout << "Change directory to: " << endl;
-    string new_directory;
-    cin >> new_directory;
+    string input_directory;
+    cin >> input_directory;
 
-    if(new_directory == ".."){
-        directory_stack.pop();
+    path new_directory = directory_stack.top()->name / input_directory;
+
+    if(new_directory.filename() == ".."){
+
+        while(new_directory.filename() == ".."){
+            
+            new_directory = new_directory.parent_path();
+            directory_stack.pop();
+        }
     }
     else{
 
-        //linear search through child vector for the directory
-        for (node *temp: directory_stack.top()->children){
-            if (temp->name == (directory_stack.top()->name / new_directory)){
-
-                directory_stack.push(temp);
-            }
-        }
-
+        cd_recursion(directory_stack, new_directory);
+        
     }
 
 }
-
 
 void scan_all(node *current){
     //incomplete function
@@ -171,7 +157,7 @@ void search(node *root){
 
         node *temp = BFS_queue.front();
         if(temp->name.filename() == search_directory){
-            cout << "found" << endl << temp->name;
+            cout << "Directory found:" << endl << temp->name << endl;
             break;
         }
 
@@ -209,7 +195,7 @@ int main()
         cin >> choice;
         if (choice == "mkdir")
         {
-            mkdir(current);
+            make_directory(current);
         }
         else if (choice == "pwd"){
             print_work_directory(current);

@@ -1,7 +1,8 @@
 #include <filesystem>
 #include <stack>
-#include <iostream>
 #include <vector>
+#include <iostream>
+#include <queue>
 #include <cstring>
 
 using namespace std;
@@ -25,23 +26,6 @@ public:
     }
 };
 
-vector<string> splitString(const string& input, const char* delimiter) {
-    vector<string> result;
-    char s[input.length() + 1];
-    strcpy(s, input.c_str());
-
-    // Pointer to point the word returned by the strtok() function.
-    char *p;
-    // Here, the delimiter is specified.
-    p = strtok(s, delimiter);
-    while (p != NULL) {
-        result.push_back(p);
-        p = strtok(NULL, delimiter);
-    }
-
-    return result;
-}
-
 void print_work_directory(node *current){
     cout << current->name << endl;
 }
@@ -49,7 +33,6 @@ void print_work_directory(node *current){
 
 path mkdir_helper(path new_directory, node **current){
     
-    // splitString(current->name.string(), "\\");
     if(exists(new_directory)){
         return new_directory;
     }
@@ -57,6 +40,24 @@ path mkdir_helper(path new_directory, node **current){
 
         mkdir_helper(new_directory.parent_path(), current);
 
+        node *new_node = new node(new_directory);     
+        (*current)->children.push_back(new_node);
+
+        cout << "Testing: did it make file? : " << create_directory(new_node->name) << endl;
+
+        for (node *temp: (*current)->children){
+            if(temp->name == new_directory)
+                (*current) = temp;
+        }
+        return new_directory;
+    }
+
+}
+
+path mkdir_helper2(path new_directory, node **current){
+    
+    if(exists(new_directory.parent_path())){
+        
         node *new_node = new node(new_directory);     
         (*current)->children.push_back(new_node);
 
@@ -119,23 +120,75 @@ int displayDirectoryStructure(node* root, int num_of_tab) {
     return 0;
 }
 
-void change_directory(node **current, path current_directory){
+void change_directory(stack<node*>& directory_stack){
     cout << "Change directory to: " << endl;
     string new_directory;
     cin >> new_directory;
 
-    //vector<node*>::iterator iter;
+    if(new_directory == ".."){
+        directory_stack.pop();
+    }
+    else{
 
-    //linear search through child vector for the directory
-    // for (iter = (*current)->children.begin(); iter != (*current)->children.end(); iter++){
-    for (node *temp: (*current)->children){
-        if (temp->name == ((*current)->name / new_directory)){
+        //linear search through child vector for the directory
+        for (node *temp: directory_stack.top()->children){
+            if (temp->name == (directory_stack.top()->name / new_directory)){
 
-            (*current) = temp;
-            
+                directory_stack.push(temp);
+            }
         }
+
     }
 
+}
+
+
+void scan_all(node *current){
+    //incomplete function
+    for(directory_entry dir: directory_iterator(current->name)){
+
+    }
+}
+
+void copy(node *current){
+    string source, destination;
+    cin >> source;
+    cin >> destination;
+
+    // copy(source, destination, std::filesystem::copy_options::recursive);
+
+}
+
+void search(node *root){
+    string search_directory;
+    cin >> search_directory;
+
+    queue<node *> BFS_queue;
+    BFS_queue.push(root);
+
+
+    while(!BFS_queue.empty()){
+
+        node *temp = BFS_queue.front();
+        if(temp->name.filename() == search_directory){
+            cout << "found" << endl << temp->name;
+            break;
+        }
+
+        BFS_queue.pop();
+
+        for(node *iteration_node: temp->children){
+
+            BFS_queue.push(iteration_node);
+        }
+    }
+}
+
+void list(node *current){
+    cout << "name:" << "\t" << "extension" << endl;
+    for(node *temp: current->children){
+        cout << temp->name.filename() << "\t" << temp->name.extension() << endl;
+    }
 }
 
 int main()
@@ -147,6 +200,10 @@ int main()
 
     string choice;
     cout << "Start" << endl;
+
+    stack<node *> directory_stack;
+    directory_stack.push(current);
+    
     do
     {
         cin >> choice;
@@ -166,10 +223,17 @@ int main()
             displayDirectoryStructure(root, 0);
         }
         else if(choice == "cd"){
-            change_directory(&current, current_directory);
+            change_directory(directory_stack);
+            current = directory_stack.top();
         }
         else if(choice == "clear"){
             system("CLS");
+        }
+        else if(choice == "ls"){
+            list(current);
+        }
+        else if(choice == "locate"){
+            search(root);
         }
         else{
             cout << "Invalid input" << endl;

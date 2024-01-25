@@ -34,7 +34,7 @@ public:
 
             Node** newData = new Node*[capacity];
 
-            for (int i = 0; i < size; ++i) {
+            for (int i = 0; i < size; i++) {
                 newData[i] = data[i];
             }
 
@@ -48,7 +48,7 @@ public:
     void Remove(Node* value) {
         int index = -1;
 
-        for (int i = 0; i < size; ++i) {
+        for (int i = 0; i < size; i++) {
             if (data[i] == value) {
                 index = i;
                 break;
@@ -57,7 +57,7 @@ public:
 
         if (index != -1) {
             // Shift elements to fill the gap
-            for (int i = index; i < size - 1; ++i) {
+            for (int i = index; i < size - 1; i++) {
                 data[i] = data[i + 1];
             }
 
@@ -65,30 +65,30 @@ public:
         }
     }
 
-    int getSize() const {
+    int getSize() {
         return size;
     }
 
-    Node* getNodeAt(int index) const {
+    Node* getNodeAt(int index) {
         if (index >= 0 && index < size) {
             return data[index];
         }
-        return nullptr;
+        return NULL;
     }
 };
 
 class Node {
 public:
     path name;
-    DynamicArray children;
+    DynamicArray sub_directories;
 
     Node(path name) {
         this->name = name;
     }
 
     ~Node() {
-        for (int i = 0; i < children.getSize(); ++i) {
-            delete children.getNodeAt(i);
+        for (int i = 0; i < sub_directories.getSize(); i++) {
+            delete sub_directories.getNodeAt(i);
         }
     }
 };
@@ -120,7 +120,7 @@ public:
 
             Node** newData = new Node*[capacity];
 
-            for (int i = 0; i < size; ++i) {
+            for (int i = 0; i < size; i++) {
                 newData[i] = data[i];
             }
 
@@ -137,15 +137,15 @@ public:
         }
     }
 
-    Node* top() const {
+    Node* top() {
         if (size > 0) {
             return data[size - 1];
         }
 
-        return nullptr;
+        return NULL;
     }
 
-    bool empty() const {
+    bool isEmpty() {
         return size == 0;
     }
 };
@@ -160,7 +160,7 @@ private:
 
 public:
     SimpleQueue() {
-        data = nullptr;
+        data = NULL;
         size = 0;
         capacity = 0;
         front = 0;
@@ -171,7 +171,7 @@ public:
         delete[] data;
     }
 
-    void push(Node* value) {
+    void enqueue(Node* value) {
         if (size == capacity) {
             if (capacity == 0) {
                 capacity = 1;
@@ -181,7 +181,7 @@ public:
 
             Node** newData = new Node*[capacity];
 
-            for (int i = 0; i < size; ++i) {
+            for (int i = 0; i < size; i++) {
                 newData[i] = data[(front + i) % capacity];
             }
 
@@ -196,22 +196,22 @@ public:
         ++size;
     }
 
-    void pop() {
+    void dequeue() {
         if (size > 0) {
             front = (front + 1) % capacity;
             --size;
         }
     }
 
-    Node* frontNode() const {
+    Node* frontNode(){
         if (size > 0) {
             return data[front];
         }
 
-        return nullptr;
+        return NULL;
     }
 
-    bool empty() const {
+    bool isEmpty(){
         return size == 0;
     }
 };
@@ -220,83 +220,54 @@ void printWorkDirectory(Node* current) {
     cout << current->name;
 }
 
-path mkdir_recursion(path newDirectory, string Filename, Node** current) {
-
-    if ((*current)->name == newDirectory) {
-        for (int i = 0; i < (*current)->children.getSize(); ++i) {
-            if ((*current)->children.getNodeAt(i)->name.filename() == Filename)
-                (*current) = (*current)->children.getNodeAt(i);
-        }
-        return newDirectory;
-    } else {
-
-        mkdir_recursion(newDirectory.parent_path(), newDirectory.filename().string(), current);
-
-        Node* newNode = new Node(newDirectory);
-        (*current)->children.push_back(newNode);
-
-        create_directory(newNode->name);
-
-        for (int i = 0; i < (*current)->children.getSize(); ++i) {
-            if ((*current)->children.getNodeAt(i)->name == newDirectory)
-                (*current) = (*current)->children.getNodeAt(i);
-        }
-        return newDirectory;
-    }
-}
-
 void make_directory(Node* current) {
-    cout << "Enter folder name: " << endl;
+    //cout << "Enter folder name: " << endl;
     string inputDirectory;
     cin >> inputDirectory;
 
     path newDirectory = current->name / inputDirectory;
 
-
     try{
         create_directory(newDirectory);
 
         Node* newNode = new Node(newDirectory);
-        current->children.push_back(newNode);
+        current->sub_directories.push_back(newNode);
         
     } catch (filesystem_error e) {
         cout << "Invalid directory" << endl;
     }
-
-    //mkdir_recursion(newDirectory.string(), "", &current);
 }
 
 int displayDirectoryStructure(Node* root, int num_of_tab) {
+
     for (int i = 0; i < num_of_tab; i++) {
-        cout << "|-------";
+        cout << "|     ";
     }
-    cout << root->name.filename() << endl;
+    cout << "|--- " << root->name.filename() << endl;
 
-    if (root->children.getSize() == 0) {
-        return 0;
-    }
-    num_of_tab++;
 
-    for (int i = 0; i < root->children.getSize(); ++i) {
-        displayDirectoryStructure(root->children.getNodeAt(i), num_of_tab);
+    for (int i = 0; i < root->sub_directories.getSize(); i++) {
+        displayDirectoryStructure(root->sub_directories.getNodeAt(i), num_of_tab + 1);
     }
+
     return 0;
 }
 
-Node* cd_recursion(SimpleStack& directoryStack, path new_directory) {
+Node* changeDirectory_recursion(SimpleStack& directoryStack, path new_directory) {
 
     if (directoryStack.top()->name == new_directory) {
         return directoryStack.top();
-    } else {
-
-        cd_recursion(directoryStack, new_directory.parent_path());
+    }
+    else {
+        changeDirectory_recursion(directoryStack, new_directory.parent_path());
 
         bool flag = false;
 
-        for (int i = 0; i < directoryStack.top()->children.getSize(); ++i) {
+        for (int i = 0; i < directoryStack.top()->sub_directories.getSize(); i++) {
 
-            if (directoryStack.top()->children.getNodeAt(i)->name == new_directory) {
-                directoryStack.push(directoryStack.top()->children.getNodeAt(i));
+            if (directoryStack.top()->sub_directories.getNodeAt(i)->name == new_directory) {
+
+                directoryStack.push(directoryStack.top()->sub_directories.getNodeAt(i));
                 flag = true;
                 break;
             }
@@ -306,6 +277,7 @@ Node* cd_recursion(SimpleStack& directoryStack, path new_directory) {
             throw string("Invalid directory");
         }
     }
+
 }
 
 void change_directory(SimpleStack& directoryStack) {
@@ -316,7 +288,7 @@ void change_directory(SimpleStack& directoryStack) {
     path new_directory = directoryStack.top()->name / inputDirectory;
 
     //safety feature
-    if ((new_directory.filename() == "..") && (directoryStack.top()->name.filename() == "root")){
+    if ((new_directory.filename() == "..") && (directoryStack.top()->name.filename() == "root")) {
         cout << "Cannot go beyond root directory" << endl;
         return;
     }
@@ -327,13 +299,15 @@ void change_directory(SimpleStack& directoryStack) {
             new_directory = new_directory.parent_path();
             directoryStack.pop();
         }
-    } else {
 
-        try{
-            cd_recursion(directoryStack, new_directory);
+    } 
+    else {
 
-        } catch (string e){
-            cout << e << endl;
+        try {
+            changeDirectory_recursion(directoryStack, new_directory);
+
+        } catch (string message){
+            cout << message << endl;
         }
     }
 }
@@ -343,44 +317,49 @@ void search(Node* root) {
     cin >> searchDirectory;
 
     SimpleQueue BFSQueue;
-    BFSQueue.push(root);
+    BFSQueue.enqueue(root);
 
-    while (!BFSQueue.empty()) {
+    while (!BFSQueue.isEmpty()) {
         Node* temp = BFSQueue.frontNode();
+
         if (temp->name.filename() == searchDirectory) {
             cout << "found at :   " << temp->name << endl;
-            break;
+            return;
         }
 
-        BFSQueue.pop();
+        BFSQueue.dequeue();
 
-        for (int i = 0; i < temp->children.getSize(); ++i) {
-            BFSQueue.push(temp->children.getNodeAt(i));
+        for (int i = 0; i < temp->sub_directories.getSize(); i++) {
+            BFSQueue.enqueue(temp->sub_directories.getNodeAt(i));
         }
     }
+
+    cout << "Directory not found" << endl;
 }
 
 void list(Node* current) {
+    string extension, directoryName;
     cout << "name:" << "\t" << "extension" << endl;
 
-    string extension;
+    for (int i = 0; i < current->sub_directories.getSize(); i++) {
 
-    for (int i = 0; i < current->children.getSize(); ++i) {
-        extension = current->children.getNodeAt(i)->name.extension().string();
+        extension = current->sub_directories.getNodeAt(i)->name.extension().string();
+        directoryName = current->sub_directories.getNodeAt(i)->name.filename().string();
+        
         if (extension == ""){
-            extension = "dir";
+            extension = "folder";
         }
 
-        cout << current->children.getNodeAt(i)->name.filename() << "\t" << extension << endl;
+        cout << directoryName << "\t" << extension << endl;
     }
 }
 
 void saveToFile(Node *root, ofstream &file) {
     file << root->name.string() << endl;
-    file << root->children.getSize() << endl;
+    file << root->sub_directories.getSize() << endl;
 
-    for (int i = 0; i < root->children.getSize(); ++i) {
-        saveToFile((*root).children.getNodeAt(i), file);
+    for (int i = 0; i < root->sub_directories.getSize(); i++) {
+        saveToFile((*root).sub_directories.getNodeAt(i), file);
     }
 }
 
@@ -393,16 +372,16 @@ Node *loadFromFile(ifstream &file) {
 
     Node *root = new Node(nodeName);
 
-    for (int i = 0; i < numChildren; ++i) {
+    for (int i = 0; i < numChildren; i++) {
         Node *child = loadFromFile(file);
-        root->children.push_back(child);
+        root->sub_directories.push_back(child);
     }
 
     return root;
 }
 
 void Delete(Node *current){
-    cout << "Enter folder name: " << endl;
+    //cout << "Enter folder name: " << endl;
     string inputDirectory;
     cin >> inputDirectory;
     bool flag = false;
@@ -411,11 +390,11 @@ void Delete(Node *current){
 
     try{
 
-        for (int i = 0; i < current->children.getSize(); i++){
+        for (int i = 0; i < current->sub_directories.getSize(); i++){
 
-            if(current->children.getNodeAt(i)->name == newDirectory){
+            if(current->sub_directories.getNodeAt(i)->name == newDirectory){
                 remove(newDirectory);
-                current->children.Remove(current->children.getNodeAt(i));
+                current->sub_directories.Remove(current->sub_directories.getNodeAt(i));
                 flag = true;
                 break;
             }
@@ -435,7 +414,7 @@ void Delete(Node *current){
 void menu(bool help){
 
     if(!help){
-        cout << "\n\t\t   WARNING!\n\n This program has the capability to edit folders.\n\t\tUse it carefully\n\n";
+        cout << "\n\t\t   WARNING!\n\n This program has the capability to edit folders.\n\t\tUse it carefully\n\n\t";
         system("pause");
         system("CLS");
 
@@ -443,18 +422,19 @@ void menu(bool help){
         cout << endl;
     }
 
-    cout << "Commands:\t" << endl
-         << "mkdir    \tCreates a new folder." << endl
-         << "ls       \tLists the contents of a directory." << endl
-         << "pwd      \tPrint Working Directory." << endl
-         << "rm       \tRemoves or deletes files or folders." << endl
-         << "cd       \tChange directory." << endl
-         << "display  \tDisplays the directory tree." << endl
-         << "clear    \tClear screen." << endl
-         << "exit     \tExit program." << endl
-         << "save     \tSave directory tree." << endl
-         << "load     \tLoad directory tree." << endl << endl
-         << "help     \tDisplay commands." << endl;
+    cout << "Commands:           \tFunctions performed:" << endl
+         << "mkdir [directory]   \tCreates a new folder." << endl
+         << "rm [directory]      \tRemoves or deletes files or folders." << endl
+         << "cd [directory]      \tChange directory." << endl
+         << "find [directory]    \tSearch directory." << endl
+         << "ls                  \tLists the contents of a directory." << endl
+         << "pwd                 \tPrint Working Directory." << endl
+         << "display             \tDisplays the directory tree." << endl
+         << "clear               \tClear screen." << endl
+         << "exit                \tExit program." << endl
+         << "save                \tSave directory tree." << endl
+         << "load                \tLoad directory tree." << endl << endl
+         << "help                \tDisplay commands." << endl;
 }
 
 int main() {
@@ -475,56 +455,83 @@ int main() {
 
     menu(0);
 
+    {
+        ifstream inFile("directory_tree.txt");
+        Node *loadedTree = loadFromFile(inFile);
+        inFile.close();
+
+        delete root;
+        root = loadedTree;
+        current = root;
+            
+        directoryStack.push(current);
+    }
+
     do {
+        cout << endl;
         printWorkDirectory(current);
         cout << " >  ";
 
         cin >> choice;
         if (choice == "mkdir") {
             make_directory(current);
-        } else if (choice == "pwd") {
+        } 
+        else if (choice == "pwd") {
             printWorkDirectory(current);
             cout << endl;
-        } else if (choice == "help") {
+        } 
+        else if (choice == "help") {
             menu(1);
-        } else if (choice == "exit") {
-            break;
-        } else if (choice == "display") {
-            displayDirectoryStructure(root, 0);
-        } else if (choice == "cd") {
-            change_directory(directoryStack);
-            current = directoryStack.top();
-        } else if (choice == "clear") {
-            system("CLS");
-        } else if (choice == "ls") {
-            list(current);
-        } else if (choice == "find") {
-            search(root);
-        } else if  (choice == "rm") {
-            Delete(current);
-        } else if (choice == "save") {
-            ofstream outFile("tree.txt");
+        } 
+        else if (choice == "exit") {
+
+            ofstream outFile("directory_tree.txt");
             saveToFile(root, outFile);
             outFile.close();
-        } else if (choice == "load") {
-            ifstream inFile("tree.txt");
+            break;
+        } 
+        else if (choice == "display") {
+            displayDirectoryStructure(root, 0);
+        } 
+        else if (choice == "cd") {
+            change_directory(directoryStack);
+            current = directoryStack.top();
+        } 
+        else if (choice == "clear") {
+            system("CLS");
+        } 
+        else if (choice == "ls") {
+            list(current);
+        } 
+        else if (choice == "find") {
+            search(root);
+        } 
+        else if  (choice == "rm") {
+            Delete(current);
+        } 
+        else if (choice == "save") {
+            ofstream outFile("directory_tree.txt");
+            saveToFile(root, outFile);
+            outFile.close();
+        } 
+        else if (choice == "load") {
+            ifstream inFile("directory_tree.txt");
             Node *loadedTree = loadFromFile(inFile);
             inFile.close();
             
-            // Cleanup existing root and set the loaded tree as the new root
             delete root;
             root = loadedTree;
             current = root;
             
             directoryStack.push(current);
         }
-         else {
+        else {
             cout << "Invalid input" << endl;
             continue;
         }
+
     } while (choice != "exit");
 
-    delete root; // Release allocated memory
-
+    delete root;
     return 0;
 }

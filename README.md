@@ -3,17 +3,17 @@ File Directory Explorer
 This is a simple command-line based directory management system implemented in C++. It allows users to create, navigate, search, list, and delete directories. The program maintains a directory tree structure and provides various commands for managing directories.
 Features
 
-  Create Directory (mkdir): Create a new folder in the current directory.
-  Remove Directory (rm): Remove or delete files or folders.
-  Change Directory (cd): Change the current working directory.
-  Search Directory (find): Search for a specific directory.
-  List Contents (ls): Lists the contents of the current directory.
-  Print Working Directory (pwd): Display the current working directory.
-  Display Directory Tree (display): Visual representation of the directory tree.
-  Clear Screen (clear): Clear the console screen.
-  Exit (exit): Save data and exit the program.
-  Save Directory Tree (save): Save the current directory tree to a file.
-  Load Directory Tree (load): Load a directory tree from a saved file.
+  - Create Directory (mkdir): Create a new folder in the current directory.
+  - Remove Directory (rm): Remove or delete files or folders.
+  - Change Directory (cd): Change the current working directory.
+  - Search Directory (find): Search for a specific directory.
+  - List Contents (ls): Lists the contents of the current directory.
+  - Print Working Directory (pwd): Display the current working directory.
+  - Display Directory Tree (display): Visual representation of the directory tree.
+  - Clear Screen (clear): Clear the console screen.
+  - Exit (exit): Save data and exit the program.
+  - Save Directory Tree (save): Save the current directory tree to a file.
+  - Load Directory Tree (load): Load a directory tree from a saved file.
 
 Getting Started
 
@@ -22,17 +22,17 @@ Getting Started
 
 Usage
 
-  Use the mentioned commands to perform various directory operations.
-  Follow on-screen instructions for creating, navigating, and managing directories.
-  Save the directory tree using the save command and load it using the load command.
+  - Use the mentioned commands to perform various directory operations.
+  - Follow on-screen instructions for creating, navigating, and managing directories.
+  - Save the directory tree using the save command and load it using the load command.
 
 Data Structures and Algorithms used:
 
-   Tree
-   Stack
-   Queue
-   Array
-   Breadth First Search
+  - Tree
+  - Stack
+  - Queue
+  - Array
+  - Breadth First Search
 
 Warning
 

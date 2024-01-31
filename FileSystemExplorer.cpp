@@ -281,7 +281,7 @@ Node* changeDirectory_recursion(SimpleStack& directoryStack, path new_directory)
 }
 
 void change_directory(SimpleStack& directoryStack) {
-    cout << "Change directory to: " << endl;
+    // cout << "Change directory to: " << endl;
     string inputDirectory;
     cin >> inputDirectory;
 
@@ -413,13 +413,14 @@ void Delete(Node *current){
 
 void menu(bool help){
 
-    if(!help){
+    if(help == 0){
         cout << "\n\t\t   WARNING!\n\n This program has the capability to edit folders.\n\t\tUse it carefully\n\n\t";
         system("pause");
         system("CLS");
 
         cout << "  ___   _   _           ___               _                     ___                _                           \n | __| (_) | |  ___    / __|  _  _   ___ | |_   ___   _ __     | __| __ __  _ __  | |  ___   _ _   ___   _ _   \n | _|  | | | | / -_)   \\__ \\ | || | (_-< |  _| / -_) | '  \\    | _|  \\ \\ / | '_ \\ | | / _ \\ | '_| / -_) | '_|  \n |_|   |_| |_| \\___|   |___/  \\_, | /__/  \\__| \\___| |_|_|_|   |___| /_\\_\\ | .__/ |_| \\___/ |_|   \\___| |_|    \n                              |__/                                         |_|                                 ";
         cout << endl;
+        cout << "Made by: Hassan & Anas" << endl;
     }
 
     cout << "Commands:           \tFunctions performed:" << endl
@@ -431,7 +432,7 @@ void menu(bool help){
          << "pwd                 \tPrint Working Directory." << endl
          << "display             \tDisplays the directory tree." << endl
          << "clear               \tClear screen." << endl
-         << "exit                \tExit program." << endl
+         << "exit                \tExit program.(saves all data before exit)" << endl
          << "save                \tSave directory tree." << endl
          << "load                \tLoad directory tree." << endl << endl
          << "help                \tDisplay commands." << endl;
@@ -440,6 +441,8 @@ void menu(bool help){
 int main() {
     path currentDirectory = current_path() / "root";
     Node* root = new Node(currentDirectory);
+    
+    menu(0);
 
     //making root directory if it doesn't exist
     if (create_directory(currentDirectory)){
@@ -448,14 +451,17 @@ int main() {
 
     Node* current = root;
 
+    //for taking user choice
     string choice;
 
     SimpleStack directoryStack;
     directoryStack.push(current);
 
-    menu(0);
+    //displays menu
 
-    {
+    //checks if text file for loading data exists. 
+    //If it exists it loads tree data from it
+    if (exists(current_path() / "directory_tree.txt")){
         ifstream inFile("directory_tree.txt");
         Node *loadedTree = loadFromFile(inFile);
         inFile.close();
@@ -485,6 +491,7 @@ int main() {
         } 
         else if (choice == "exit") {
 
+            // saves data and exits program
             ofstream outFile("directory_tree.txt");
             saveToFile(root, outFile);
             outFile.close();
@@ -526,7 +533,7 @@ int main() {
             directoryStack.push(current);
         }
         else {
-            cout << "Invalid input" << endl;
+            cout << "Invalid command" << endl;
             continue;
         }
 

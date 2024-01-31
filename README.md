@@ -26,7 +26,7 @@ Features
   - Follow on-screen instructions for creating, navigating, and managing directories.
   - Save the directory tree using the save command and load it using the load command.
 
-Data Structures and Algorithms used:
+## Data Structures and Algorithms used:
 
   - Tree
   - Stack

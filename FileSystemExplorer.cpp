@@ -426,7 +426,7 @@ void menu(bool help){
     cout << "Commands:           \tFunctions performed:" << endl
          << "mkdir [directory]   \tCreates a new folder." << endl
          << "rm [directory]      \tRemoves or deletes files or folders." << endl
-         << "cd [directory]      \tChange directory." << endl
+         << "cd [directory]      \tChange directory.(to go back type \"..\" or \"..\\..\")" << endl
          << "find [directory]    \tSearch directory." << endl
          << "ls                  \tLists the contents of a directory." << endl
          << "pwd                 \tPrint Working Directory." << endl
